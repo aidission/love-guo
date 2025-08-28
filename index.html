@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>七夕</title>
+<style>
+  * {margin: 0; padding: 0; box-sizing: border-box;}
+  html, body {height: 100%; overflow: hidden;}
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url('https://images.unsplash.com/photo-1520962919677-c4e2b6bcd5a7') no-repeat center center/cover;
+    font-family: 'Microsoft Yahei', sans-serif;
+  }
+  .message-box {
+    position: absolute;
+    top: 40%;
+    width: 80%;
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    text-align: center;
+    font-size: 18px;
+    cursor: pointer;
+    animation: bounce 1s infinite alternate;
+  }
+  @keyframes bounce {
+    0% {transform: translateY(0);}
+    100% {transform: translateY(-10px);}
+  }
+  .hidden {display: none;}
+
+  .star-page {
+    background: black;
+    width: 100%; height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    display: none;
+    overflow: hidden;
+  }
+  canvas {position: absolute; top: 0; left: 0;}
+
+  .scroll-text {
+    position: absolute;
+    white-space: nowrap;
+    font-size: 24px;
+    color: #fff;
+    animation: scrollUp 10s linear infinite;
+  }
+  @keyframes scrollUp {
+    0% {transform: translateY(100vh);}
+    100% {transform: translateY(-100%);}
+  }
+  .heart {
+    position: absolute;
+    color: pink;
+    font-size: 24px;
+    animation: heartFloat 3s ease-out infinite;
+  }
+  @keyframes heartFloat {
+    0% {transform: translateY(0) scale(0.5); opacity: 1;}
+    100% {transform: translateY(-200px) scale(1.2); opacity: 0;}
+  }
+</style>
+</head>
+<body>
+  <div class="message-box" onclick="showStarPage()">郭雪洁，您有一条消息待查看</div>
+  <div class="star-page" id="starPage">
+    <audio autoplay loop id="bgm">
+      <source src="https://www.mfiles.co.uk/mp3-downloads/erik-satie-gymnopedie-1.mp3" type="audio/mpeg">
+    </audio>
+    <canvas id="starCanvas"></canvas>
+  </div>
+<script>
+const messages = [
+  '郭雪洁我喜欢你 ❤️','和我在一起 💕','I love you 💖','遇见你超开心 😍','小幸运 ✨',
+  '你是我的唯一 💌','愿陪你到老 🌙','永远守护你 💘','想念你的笑 😊','每一天都想你 💓',
+  '你的眼睛最美 🌟','牵着你的手 ❤️','你是我的小幸运 🍀','喜欢你的声音 🎵','爱你每一秒 ⏰',
+  '你是我的心跳 💗','想和你看星星 ✨','每晚梦到你 🌙','陪你走天涯 🌏','心中永远的你 💖'
+];
+
+function showStarPage() {
+  document.querySelector('.message-box').classList.add('hidden');
+  const starPage = document.getElementById('starPage');
+  starPage.style.display = 'block';
+
+  // 粒子动态效果
+  const canvas = document.getElementById('starCanvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const particles = [];
+  for(let i=0;i<300;i++){
+    particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2+1,vx:(Math.random()-0.5)*0.5,vy:(Math.random()-0.5)*0.5});
+  }
+  function draw() {
+    ctx.fillStyle='rgba(0,0,0,0.1)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;
+      if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='white';
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  // 滚动文字生成更多条
+  for (let i = 0; i < 40; i++) {
+    let span = document.createElement('div');
+    span.className = 'scroll-text';
+    span.style.top = (Math.random() * 100) + 'vh';
+    span.style.left = (Math.random() * 100) + 'vw';
+    span.style.animationDuration = (5 + Math.random()*10) + 's';
+    span.style.fontSize = (16 + Math.random()*20) + 'px';
+    span.style.color = `hsl(${Math.random()*360}, 70%, 70%)`;
+    span.innerHTML = messages[Math.floor(Math.random()*messages.length)];
+    starPage.appendChild(span);
+  }
+
+  // 随机爱心动画
+  setInterval(() => {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.style.left = Math.random()*window.innerWidth + 'px';
+    heart.style.fontSize = (16 + Math.random()*24) + 'px';
+    heart.innerHTML = '❤️';
+    starPage.appendChild(heart);
+    setTimeout(() => {starPage.removeChild(heart);}, 3000);
+  }, 500);
+}
+
+// 手指缩放效果
+let scale = 1;
+document.addEventListener('gesturechange', function(e) {
+  e.preventDefault();
+  scale = e.scale;
+  document.querySelectorAll('.scroll-text').forEach(item => {
+    item.style.fontSize = (16 + scale*10) + 'px';
+    item.style.letterSpacing = (scale*2) + 'px';
+    item.style.color = `hsl(${Math.random()*360}, 70%, 70%)`;
+  });
+});
+</script>
+</body>
+</html>
